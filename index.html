@@ -3,20 +3,227 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>PARDUM FF SHOP</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #0b0b0f;
+      color: white;
+    }
+
+    header {
+      background: linear-gradient(135deg, #ff7a00, #ff1744);
+      padding: 25px 15px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(255, 80, 0, 0.3);
+    }
+
+    header h1 {
+      font-size: 30px;
+      font-weight: 900;
+    }
+
+    header p {
+      margin-top: 7px;
+      color: #fff;
+      opacity: 0.9;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 30px 15px;
+    }
+
+    .hero h2 {
+      font-size: 25px;
+      margin-bottom: 10px;
+    }
+
+    .hero span {
+      color: #ff7a00;
+    }
+
+    .hero p {
+      color: #aaa;
+      line-height: 1.5;
+    }
+
+    .products {
+      padding: 10px 15px 30px;
+    }
+
+    .products-title {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .card {
+      background: #15151c;
+      border: 1px solid #292933;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    }
+
+    .icon {
+      font-size: 45px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .card h3 {
+      text-align: center;
+      font-size: 21px;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 15px;
+    }
+
+    .price {
+      text-align: center;
+      font-size: 25px;
+      font-weight: bold;
+      color: #00e676;
+      margin-bottom: 15px;
+    }
+
+    .buy {
+      display: block;
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      background: linear-gradient(90deg, #ff7a00, #ff1744);
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .buy:active {
+      transform: scale(0.98);
+    }
+
+    .notice {
+      margin: 10px 15px 30px;
+      padding: 18px;
+      border-radius: 15px;
+      background: #17171f;
+      border-left: 4px solid #ff7a00;
+    }
+
+    .notice h3 {
+      margin-bottom: 8px;
+    }
+
+    .notice p {
+      color: #aaa;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px 15px;
+      background: #07070a;
+      color: #777;
+      font-size: 13px;
+    }
+
+    footer strong {
+      color: #ff7a00;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>🔥 PARDUM FF SHOP</h1>
-  <p>Welcome to our Free Fire Shop</p>
 
-  <h2>🎮 Products</h2>
+  <header>
+    <h1>🔥 PARDUM FF SHOP</h1>
+    <p>Free Fire Gaming Store</p>
+  </header>
 
-  <div>
-    <h3>Free Fire Service</h3>
-    <p>Price: ₹99</p>
-    <button>Buy Now</button>
+  <section class="hero">
+    <h2>Welcome to <span>PARDUM FF SHOP</span></h2>
+    <p>Gaming services and products at simple prices.</p>
+  </section>
+
+  <section class="products">
+
+    <h2 class="products-title">🎮 Our Products</h2>
+
+    <!-- PRODUCT 1 -->
+    <div class="card">
+      <div class="icon">🎮</div>
+      <h3>Free Fire Service</h3>
+      <p>Basic gaming service</p>
+      <div class="price">₹99</div>
+      <button class="buy" onclick="order('Free Fire Service', '₹99')">
+        🛒 Buy Now
+      </button>
+    </div>
+
+    <!-- PRODUCT 2 -->
+    <div class="card">
+      <div class="icon">⚡</div>
+      <h3>Premium Service</h3>
+      <p>Premium gaming service</p>
+      <div class="price">₹199</div>
+      <button class="buy" onclick="order('Premium Service', '₹199')">
+        🛒 Buy Now
+      </button>
+    </div>
+
+    <!-- PRODUCT 3 -->
+    <div class="card">
+      <div class="icon">🔥</div>
+      <h3>Special Service</h3>
+      <p>Special gaming service</p>
+      <div class="price">₹299</div>
+      <button class="buy" onclick="order('Special Service', '₹299')">
+        🛒 Buy Now
+      </button>
+    </div>
+
+  </section>
+
+  <div class="notice">
+    <h3>📢 Important</h3>
+    <p>
+      Please check the product/service details before placing an order.
+      Only use legitimate services and follow the game's rules.
+    </p>
   </div>
+
+  <footer>
+    © 2026 <strong>PARDUM FF SHOP</strong><br>
+    All Rights Reserved
+  </footer>
+
+  <script>
+    function order(product, price) {
+      alert(
+        "🛒 Order Selected!\n\n" +
+        "Product: " + product +
+        "\nPrice: " + price +
+        "\n\nOrder system will be added next."
+      );
+    }
+  </script>
 
 </body>
 </html>
