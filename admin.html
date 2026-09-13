@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARDUM FF SHOP • Admin</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0b1020;color:#fff}
+header{padding:20px 16px;background:#151b35;border-bottom:1px solid #283353}
+header h1{margin:0;font-size:24px}.container{max-width:1100px;margin:auto;padding:18px}
+.panel{background:#151c32;border:1px solid #283353;border-radius:16px;padding:18px;margin-bottom:18px}
+input,textarea,select{width:100%;padding:12px;margin:6px 0 12px;border-radius:9px;border:1px solid #39466b;background:#0d1427;color:#fff;font-size:16px}
+textarea{min-height:80px}button{border:0;border-radius:9px;padding:11px 14px;font-weight:700;cursor:pointer}
+.primary{background:#00d084;color:#07130d}.danger{background:#ff5b6e;color:#fff}.secondary{background:#303a59;color:#fff}
+.hidden{display:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.item{background:#10172b;border:1px solid #2b3759;border-radius:14px;padding:15px}
+.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1}
+.muted{color:#9da9c9}.top{display:flex;justify-content:space-between;gap:10px;align-items:center}
+table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #293553;text-align:left;vertical-align:top}th{color:#9da9c9}
+.tablewrap{overflow:auto}.msg{min-height:20px;color:#9fe9c4}
+</style>
+</head>
+<body>
+<header><div class="container"><div class="top"><h1>🔐 PARDUM FF SHOP — Admin</h1><button id="logout" class="secondary hidden">Logout</button></div></div></header>
+
+<div class="container">
+<section id="loginPanel" class="panel">
+  <h2>Admin Login</h2>
+  <p class="muted">Use your Firebase Email/Password admin account.</p>
+  <input id="email" type="email" value="ananda01.cjncjc@gmail.com" placeholder="Admin email">
+  <input id="password" type="password" placeholder="Password">
+  <button id="loginBtn" class="primary">Login</button>
+  <div id="loginMsg" class="msg"></div>
+</section>
+
+<section id="adminPanel" class="hidden">
+  <div class="panel">
+    <h2 id="formTitle">Add Product</h2>
+    <input id="productName" placeholder="Product / Service name">
+    <input id="price" type="number" min="0" step="0.01" placeholder="Price (₹)">
+    <input id="emoji" placeholder="Emoji e.g. 🎮" value="🎮">
+    <textarea id="description" placeholder="Description"></textarea>
+    <label><input id="active" type="checkbox" checked style="width:auto"> Active / visible in shop</label>
+    <div class="actions">
+      <button id="saveBtn" class="primary">Add Product</button>
+      <button id="cancelEdit" class="secondary hidden">Cancel Edit</button>
+    </div>
+    <div id="productMsg" class="msg"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Products</h2>
+    <div id="productList" class="grid"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Orders</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Product</th><th>Customer</th><th>Contact</th><th>Note</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="orderList"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBDn7Nf1zPsZKklJ-GKwVXqp1SM5kNqbU4",
+  authDomain: "pardum-ff-shop.firebaseapp.com",
+  projectId: "pardum-ff-shop",
+  storageBucket: "pardum-ff-shop.firebasestorage.app",
+  messagingSenderId: "93673451331",
+  appId: "1:93673451331:web:c30b90ab737753d85cc9f6",
+  measurementId: "G-9YSYW9SMDN"
+};
+
+const ADMIN_EMAIL = "ananda01.cjncjc@gmail.com";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const loginPanel = document.getElementById("loginPanel");
+const adminPanel = document.getElementById("adminPanel");
+const logoutBtn = document.getElementById("logout");
+let editingId = null;
+let productsCache = [];
+
+document.getElementById("loginBtn").onclick = async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("loginMsg");
+  msg.textContent = "Logging in...";
+  try{
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    if((cred.user.email || "").toLowerCase() !== ADMIN_EMAIL){
+      await signOut(auth);
+      throw new Error("This account is not the shop admin account.");
+    }
+    msg.textContent = "";
+  }catch(e){
+    console.error(e);
+    msg.textContent = "❌ Login failed: " + (e.code === "auth/invalid-credential" ? "Wrong email or password." : e.message);
+  }
+};
+
+logoutBtn.onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, user => {
+  const isAdmin = user && (user.email || "").toLowerCase() === ADMIN_EMAIL;
+  loginPanel.classList.toggle("hidden", !!isAdmin);
+  adminPanel.classList.toggle("hidden", !isAdmin);
+  logoutBtn.classList.toggle("hidden", !isAdmin);
+  if(isAdmin) startAdminListeners();
+});
+
+function productName(d){ return d.name ?? d["Free Fire Service"] ?? "Free Fire Service"; }
+
+function startAdminListeners(){
+  onSnapshot(collection(db,"products"), snap => {
+    productsCache = [];
+    snap.forEach(s => productsCache.push({id:s.id, ...s.data()}));
+    renderProducts();
+  }, console.error);
+
+  const q = query(collection(db,"orders"), orderBy("createdAt","desc"));
+  onSnapshot(q, snap => {
+    const el = document.getElementById("orderList");
+    el.innerHTML = "";
+    snap.forEach(s => {
+      const d = s.data();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${esc(d.productName)}<br><span class="muted">₹${Number(d.price||0).toFixed(2)}</span></td>
+        <td>${esc(d.customerName)}</td>
+        <td>${esc(d.contact)}</td>
+        <td>${esc(d.note || "")}</td>
+        <td>
+          <select class="statusSelect">
+            ${["pending","processing","completed","cancelled"].map(x=>`<option ${d.status===x?"selected":""}>${x}</option>`).join("")}
+          </select>
+        </td>
+        <td><button class="danger deleteOrder">Delete</button></td>`;
+      tr.querySelector(".statusSelect").onchange = async e => {
+        await updateDoc(doc(db,"orders",s.id), {status:e.target.value});
+      };
+      tr.querySelector(".deleteOrder").onclick = async () => {
+        if(confirm("Delete this order?")) await deleteDoc(doc(db,"orders",s.id));
+      };
+      el.appendChild(tr);
+    });
+  }, err => {
+    console.error(err);
+    document.getElementById("orderList").innerHTML = '<tr><td colspan="6">Orders could not load. Check Firestore rules/index.</td></tr>';
+  });
+}
+
+function esc(v){
+  return String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+function renderProducts(){
+  const el = document.getElementById("productList");
+  el.innerHTML = "";
+  if(!productsCache.length){el.innerHTML='<p class="muted">No products yet.</p>';return;}
+  productsCache.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "item";
+    card.innerHTML = `
+      <div style="font-size:34px">${esc(p.emoji||"🎮")}</div>
+      <h3>${esc(productName(p))}</h3>
+      <div>₹${Number(p.price||0).toFixed(2)}</div>
+      <p class="muted">${esc(p.description||"")}</p>
+      <p>${p.active === false ? "🔴 Hidden" : "🟢 Active"}</p>
+      <div class="actions">
+        <button class="secondary edit">Edit</button>
+        <button class="danger del">Delete</button>
+      </div>`;
+    card.querySelector(".edit").onclick = () => editProduct(p);
+    card.querySelector(".del").onclick = () => removeProduct(p.id);
+    el.appendChild(card);
+  });
+}
+
+function editProduct(p){
+  editingId = p.id;
+  document.getElementById("formTitle").textContent = "Edit Product";
+  document.getElementById("saveBtn").textContent = "Save Changes";
+  document.getElementById("cancelEdit").classList.remove("hidden");
+  document.getElementById("productName").value = productName(p);
+  document.getElementById("price").value = Number(p.price||0);
+  document.getElementById("emoji").value = p.emoji || "🎮";
+  document.getElementById("description").value = p.description || "";
+  document.getElementById("active").checked = p.active !== false;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.getElementById("cancelEdit").onclick = resetForm;
+
+document.getElementById("saveBtn").onclick = async () => {
+  const name = document.getElementById("productName").value.trim();
+  const price = Number(document.getElementById("price").value);
+  const description = document.getElementById("description").value.trim();
+  const emoji = document.getElementById("emoji").value.trim() || "🎮";
+  const active = document.getElementById("active").checked;
+  const msg = document.getElementById("productMsg");
+  if(!name || !Number.isFinite(price) || price < 0){msg.textContent="❌ Name and valid price are required.";return;}
+  msg.textContent="Saving...";
+  try{
+    const data = {name, price, emoji, description, active, updatedAt:serverTimestamp()};
+    if(editingId) await updateDoc(doc(db,"products",editingId), data);
+    else await addDoc(collection(db,"products"), {...data, createdAt:serverTimestamp()});
+    msg.textContent="✅ Saved!";
+    resetForm();
+    setTimeout(()=>msg.textContent="",1200);
+  }catch(e){console.error(e);msg.textContent="❌ Save failed: "+e.message;}
+};
+
+async function removeProduct(id){
+  if(!confirm("Delete this product?")) return;
+  try{await deleteDoc(doc(db,"products",id));}
+  catch(e){alert("Delete failed: "+e.message);}
+}
+
+function resetForm(){
+  editingId = null;
+  document.getElementById("formTitle").textContent="Add Product";
+  document.getElementById("saveBtn").textContent="Add Product";
+  document.getElementById("cancelEdit").classList.add("hidden");
+  document.getElementById("productName").value="";
+  document.getElementById("price").value="";
+  document.getElementById("emoji").value="🎮";
+  document.getElementById("description").value="";
+  document.getElementById("active").checked=true;
+}
+</script>
+</body>
+</html>

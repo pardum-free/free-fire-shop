@@ -1,850 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>PARDUM FF SHOP - Admin Panel</title>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background: #0b0b0f;
-      color: white;
-      min-height: 100vh;
-    }
-
-    /* LOGIN */
-
-    .login-box {
-      width: 92%;
-      max-width: 400px;
-      margin: 80px auto;
-      background: #15151c;
-      padding: 30px 22px;
-      border-radius: 20px;
-      border: 1px solid #292933;
-      box-shadow: 0 10px 40px rgba(0,0,0,.5);
-    }
-
-    .login-box h1 {
-      text-align: center;
-      margin-bottom: 8px;
-      color: #ff7a00;
-    }
-
-    .login-box p {
-      text-align: center;
-      color: #888;
-      margin-bottom: 25px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 14px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      border: 1px solid #33333d;
-      background: #0d0d12;
-      color: white;
-      outline: none;
-    }
-
-    input:focus, select:focus {
-      border-color: #ff7a00;
-    }
-
-    button {
-      border: none;
-      cursor: pointer;
-    }
-
-    .login-btn,
-    .add-btn,
-    .save-btn {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      background: linear-gradient(90deg,#ff7a00,#ff1744);
-    }
-
-    .error {
-      color: #ff5252;
-      text-align: center;
-      margin-top: 12px;
-      display: none;
-    }
-
-    /* ADMIN */
-
-    #adminPanel {
-      display: none;
-    }
-
-    header {
-      background: linear-gradient(135deg,#ff7a00,#ff1744);
-      padding: 20px 15px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    header h1 {
-      font-size: 22px;
-    }
-
-    .logout {
-      background: rgba(0,0,0,.3);
-      color: white;
-      padding: 9px 13px;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-
-    .container {
-      width: 94%;
-      max-width: 1000px;
-      margin: 25px auto;
-    }
-
-    /* STATS */
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 12px;
-      margin-bottom: 25px;
-    }
-
-    .stat {
-      background: #15151c;
-      border: 1px solid #292933;
-      padding: 20px 10px;
-      border-radius: 15px;
-      text-align: center;
-    }
-
-    .stat .number {
-      font-size: 28px;
-      font-weight: bold;
-      color: #ff7a00;
-      margin-bottom: 5px;
-    }
-
-    .stat p {
-      color: #888;
-      font-size: 13px;
-    }
-
-    /* CARD */
-
-    .panel-card {
-      background: #15151c;
-      border: 1px solid #292933;
-      border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .panel-card h2 {
-      margin-bottom: 18px;
-      color: #ff7a00;
-    }
-
-    /* PRODUCTS */
-
-    .product {
-      background: #0d0d12;
-      border: 1px solid #292933;
-      padding: 15px;
-      border-radius: 13px;
-      margin-bottom: 12px;
-    }
-
-    .product-top {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .product-icon {
-      font-size: 35px;
-    }
-
-    .product-info {
-      flex: 1;
-    }
-
-    .product-info h3 {
-      margin-bottom: 5px;
-    }
-
-    .product-info p {
-      color: #888;
-      font-size: 13px;
-    }
-
-    .product-price {
-      color: #00e676;
-      font-size: 19px;
-      font-weight: bold;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 13px;
-    }
-
-    .edit,
-    .delete {
-      flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
-    }
-
-    .edit {
-      background: #1565c0;
-    }
-
-    .delete {
-      background: #d32f2f;
-    }
-
-    .empty {
-      text-align: center;
-      color: #777;
-      padding: 20px;
-    }
-
-    /* ORDERS */
-
-    .order {
-      background: #0d0d12;
-      border: 1px solid #292933;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-    }
-
-    .order strong {
-      color: #ff7a00;
-    }
-
-    .order p {
-      color: #aaa;
-      margin-top: 5px;
-      font-size: 14px;
-    }
-
-    .order-status {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 6px 10px;
-      border-radius: 20px;
-      background: #5d4037;
-      color: #ffccbc;
-      font-size: 12px;
-    }
-
-    @media(max-width:600px) {
-      .stats {
-        grid-template-columns: 1fr;
-      }
-
-      header h1 {
-        font-size: 18px;
-      }
-
-      .product-top {
-        align-items: flex-start;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARDUM FF SHOP</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0b1020;color:#fff}
+header{padding:24px 16px;text-align:center;background:linear-gradient(135deg,#151b35,#10172d);border-bottom:1px solid #26304f}
+h1{margin:0;font-size:28px}header p{color:#aeb8d6;margin:8px 0 0}
+.container{max-width:1000px;margin:auto;padding:18px}
+#status{text-align:center;color:#9eabd0;margin:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:#151c32;border:1px solid #283353;border-radius:16px;padding:18px;box-shadow:0 8px 25px #0003}
+.emoji{font-size:42px}.card h2{font-size:20px;margin:10px 0}.desc{color:#aeb8d6;min-height:40px}.price{font-size:24px;font-weight:700;margin:15px 0;color:#65e6a5}
+button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}
+.buy{width:100%;background:#00d084;color:#07130d}.buy:hover{background:#20e59b}
+.modal{display:none;position:fixed;inset:0;background:#000b;align-items:center;justify-content:center;padding:16px;z-index:5}
+.modal.show{display:flex}.box{width:min(480px,100%);background:#151c32;border:1px solid #303d62;border-radius:18px;padding:20px}
+.box h2{margin-top:0}input,textarea{width:100%;padding:13px;margin:7px 0 12px;border-radius:10px;border:1px solid #39466b;background:#0d1427;color:#fff;font-size:16px}
+textarea{min-height:90px;resize:vertical}.row{display:flex;gap:10px}.row button{flex:1}.cancel{background:#303a59;color:#fff}.submit{background:#00d084;color:#07130d}
+.message{text-align:center;margin-top:12px;min-height:20px}
+.empty{text-align:center;color:#aeb8d6;padding:40px}
+footer{text-align:center;color:#7783a5;padding:30px}
+</style>
 </head>
-
 <body>
+<header><h1>🎮 PARDUM FF SHOP</h1><p>Free Fire Services • Fast & Trusted</p></header>
+<div class="container">
+  <div id="status">Loading products...</div>
+  <div id="products" class="grid"></div>
+</div>
+<footer>© PARDUM FF SHOP</footer>
 
-<!-- ================= LOGIN ================= -->
-
-<div id="loginPage">
-
-  <div class="login-box">
-
-    <h1>🔥 PARDUM FF</h1>
-
-    <p>Admin Panel Login</p>
-
-    <input
-      type="text"
-      id="username"
-      placeholder="Admin Username"
-    >
-
-    <input
-      type="password"
-      id="password"
-      placeholder="Admin Password"
-    >
-
-    <button class="login-btn" onclick="login()">
-      🔐 Login
-    </button>
-
-    <div class="error" id="loginError">
-      ❌ Wrong username or password
-    </div>
-
+<div id="modal" class="modal">
+  <div class="box">
+    <h2 id="modalTitle">Place Order</h2>
+    <p id="modalPrice"></p>
+    <form id="orderForm">
+      <input id="customerName" placeholder="Your name" required maxlength="80">
+      <input id="contact" placeholder="WhatsApp / Phone / Contact" required maxlength="80">
+      <textarea id="note" placeholder="UID, package details or note" maxlength="500"></textarea>
+      <div class="row">
+        <button type="button" class="cancel" id="closeBtn">Cancel</button>
+        <button type="submit" class="submit">Submit Order</button>
+      </div>
+      <div id="message" class="message"></div>
+    </form>
   </div>
-
 </div>
 
-
-<!-- ================= ADMIN PANEL ================= -->
-
-<div id="adminPanel">
-
-  <header>
-
-    <h1>🔥 PARDUM FF SHOP</h1>
-
-    <button class="logout" onclick="logout()">
-      Logout
-    </button>
-
-  </header>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 
-  <div class="container">
+const firebaseConfig = {
+  apiKey: "AIzaSyBDn7Nf1zPsZKklJ-GKwVXqp1SM5kNqbU4",
+  authDomain: "pardum-ff-shop.firebaseapp.com",
+  projectId: "pardum-ff-shop",
+  storageBucket: "pardum-ff-shop.firebasestorage.app",
+  messagingSenderId: "93673451331",
+  appId: "1:93673451331:web:c30b90ab737753d85cc9f6",
+  measurementId: "G-9YSYW9SMDN"
+};
 
-    <!-- STATS -->
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    <div class="stats">
+const productsEl = document.getElementById("products");
+const statusEl = document.getElementById("status");
+const modal = document.getElementById("modal");
+const form = document.getElementById("orderForm");
+let selectedProduct = null;
 
-      <div class="stat">
-        <div class="number" id="productCount">0</div>
-        <p>Products</p>
-      </div>
+function safeText(v){ return v == null ? "" : String(v); }
+function productName(d){
+  return d.name ?? d["Free Fire Service"] ?? "Free Fire Service";
+}
 
-      <div class="stat">
-        <div class="number" id="orderCount">0</div>
-        <p>Orders</p>
-      </div>
-
-      <div class="stat">
-        <div class="number" id="salesCount">₹0</div>
-        <p>Total Sales</p>
-      </div>
-
-    </div>
-
-
-    <!-- ADD PRODUCT -->
-
-    <div class="panel-card">
-
-      <h2>➕ Add Product</h2>
-
-      <input
-        type="text"
-        id="productName"
-        placeholder="Product Name"
-      >
-
-      <input
-        type="text"
-        id="productDescription"
-        placeholder="Product Description"
-      >
-
-      <input
-        type="number"
-        id="productPrice"
-        placeholder="Price ₹"
-      >
-
-      <input
-        type="text"
-        id="productIcon"
-        placeholder="Product Emoji e.g. 💎"
-      >
-
-      <button class="add-btn" onclick="addProduct()">
-        ➕ Add Product
-      </button>
-
-    </div>
-
-
-    <!-- PRODUCT LIST -->
-
-    <div class="panel-card">
-
-      <h2>🛍️ Products</h2>
-
-      <div id="productList"></div>
-
-    </div>
-
-
-    <!-- ORDERS -->
-
-    <div class="panel-card">
-
-      <h2>📦 Orders</h2>
-
-      <div id="orderList"></div>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<script>
-
-  /* ================= LOGIN ================= */
-
-  const ADMIN_USERNAME = "admin";
-  const ADMIN_PASSWORD = "1234";
-
-  function login() {
-
-    const username =
-      document.getElementById("username").value.trim();
-
-    const password =
-      document.getElementById("password").value;
-
-    if (
-      username === ADMIN_USERNAME &&
-      password === ADMIN_PASSWORD
-    ) {
-
-      localStorage.setItem("adminLoggedIn","true");
-
-      showAdmin();
-
-    } else {
-
-      document.getElementById("loginError").style.display =
-        "block";
-
-    }
-
+onSnapshot(collection(db, "products"), (snapshot) => {
+  productsEl.innerHTML = "";
+  const products = [];
+  snapshot.forEach(s => {
+    const d = s.data();
+    if (d.active !== false) products.push({id:s.id, ...d});
+  });
+  statusEl.textContent = products.length ? `${products.length} service(s) available` : "No products available";
+  if(!products.length){
+    productsEl.innerHTML = '<div class="empty">No services available right now.</div>';
+    return;
   }
-
-
-  function showAdmin() {
-
-    document.getElementById("loginPage").style.display =
-      "none";
-
-    document.getElementById("adminPanel").style.display =
-      "block";
-
-    loadProducts();
-    loadOrders();
-
-  }
-
-
-  function logout() {
-
-    localStorage.removeItem("adminLoggedIn");
-
-    location.reload();
-
-  }
-
-
-  /* ================= PRODUCTS ================= */
-
-  let products =
-    JSON.parse(localStorage.getItem("ffProducts")) || [
-
-      {
-        id: 1,
-        name: "Free Fire Service",
-        description: "Basic gaming service",
-        price: 99,
-        icon: "🎮"
-      },
-
-      {
-        id: 2,
-        name: "Premium Service",
-        description: "Premium gaming service",
-        price: 199,
-        icon: "⚡"
-      },
-
-      {
-        id: 3,
-        name: "Special Service",
-        description: "Special gaming service",
-        price: 299,
-        icon: "🔥"
-      }
-
-    ];
-
-
-  function saveProducts() {
-
-    localStorage.setItem(
-      "ffProducts",
-      JSON.stringify(products)
-    );
-
-  }
-
-
-  function addProduct() {
-
-    const name =
-      document.getElementById("productName").value.trim();
-
-    const description =
-      document.getElementById("productDescription").value.trim();
-
-    const price =
-      Number(document.getElementById("productPrice").value);
-
-    const icon =
-      document.getElementById("productIcon").value.trim() || "🎮";
-
-
-    if (!name || !description || !price) {
-
-      alert("⚠️ Please fill all product details.");
-
-      return;
-
-    }
-
-
-    const newProduct = {
-
-      id: Date.now(),
-
-      name: name,
-
-      description: description,
-
-      price: price,
-
-      icon: icon
-
-    };
-
-
-    products.push(newProduct);
-
-    saveProducts();
-
-    loadProducts();
-
-
-    document.getElementById("productName").value = "";
-    document.getElementById("productDescription").value = "";
-    document.getElementById("productPrice").value = "";
-    document.getElementById("productIcon").value = "";
-
-    alert("✅ Product added successfully!");
-
-  }
-
-
-  function loadProducts() {
-
-    const list =
-      document.getElementById("productList");
-
-    list.innerHTML = "";
-
-
-    if (products.length === 0) {
-
-      list.innerHTML =
-        '<div class="empty">No products available.</div>';
-
-    }
-
-
-    products.forEach(product => {
-
-      list.innerHTML += `
-
-        <div class="product">
-
-          <div class="product-top">
-
-            <div class="product-icon">
-              ${escapeHTML(product.icon)}
-            </div>
-
-            <div class="product-info">
-
-              <h3>
-                ${escapeHTML(product.name)}
-              </h3>
-
-              <p>
-                ${escapeHTML(product.description)}
-              </p>
-
-            </div>
-
-            <div class="product-price">
-              ₹${Number(product.price).toLocaleString("en-IN")}
-            </div>
-
-          </div>
-
-          <div class="actions">
-
-            <button
-              class="edit"
-              onclick="editProduct(${product.id})">
-              ✏️ Edit
-            </button>
-
-            <button
-              class="delete"
-              onclick="deleteProduct(${product.id})">
-              🗑️ Delete
-            </button>
-
-          </div>
-
-        </div>
-
-      `;
-
+  products.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const price = Number(p.price ?? 0);
+    card.innerHTML = `
+      <div class="emoji">${safeText(p.emoji || "🎮")}</div>
+      <h2>${safeText(productName(p))}</h2>
+      <div class="desc">${safeText(p.description || "Free Fire service")}</div>
+      <div class="price">₹${price.toFixed(2)}</div>
+      <button class="buy">Order Now</button>`;
+    card.querySelector(".buy").onclick = () => openOrder(p);
+    productsEl.appendChild(card);
+  });
+}, (err) => {
+  console.error(err);
+  statusEl.textContent = "Could not load products. Check Firestore Rules.";
+});
+
+function openOrder(p){
+  selectedProduct = p;
+  document.getElementById("modalTitle").textContent = "Order: " + productName(p);
+  document.getElementById("modalPrice").textContent = "Price: ₹" + Number(p.price ?? 0).toFixed(2);
+  document.getElementById("message").textContent = "";
+  form.reset();
+  modal.classList.add("show");
+}
+document.getElementById("closeBtn").onclick = () => modal.classList.remove("show");
+modal.onclick = e => { if(e.target === modal) modal.classList.remove("show"); };
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if(!selectedProduct) return;
+  const msg = document.getElementById("message");
+  msg.textContent = "Submitting...";
+  try{
+    const uid = (crypto.randomUUID ? crypto.randomUUID() : "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2));
+    await addDoc(collection(db, "orders"), {
+      productId: selectedProduct.id,
+      productName: productName(selectedProduct),
+      price: Number(selectedProduct.price ?? 0),
+      customerName: document.getElementById("customerName").value.trim(),
+      uid: uid,
+      contact: document.getElementById("contact").value.trim(),
+      note: document.getElementById("note").value.trim(),
+      status: "pending",
+      createdAt: serverTimestamp()
     });
-
-
-    updateStats();
-
+    msg.textContent = "✅ Order submitted successfully!";
+    form.reset();
+    setTimeout(() => modal.classList.remove("show"), 1200);
+  }catch(err){
+    console.error(err);
+    msg.textContent = "❌ Order failed. Please try again.";
   }
-
-
-  function editProduct(id) {
-
-    const product =
-      products.find(p => p.id === id);
-
-    if (!product) return;
-
-
-    const name =
-      prompt("Product Name:", product.name);
-
-    if (name === null) return;
-
-
-    const description =
-      prompt(
-        "Product Description:",
-        product.description
-      );
-
-    if (description === null) return;
-
-
-    const price =
-      prompt("Price ₹:", product.price);
-
-    if (price === null) return;
-
-
-    const icon =
-      prompt("Product Emoji:", product.icon);
-
-    if (icon === null) return;
-
-
-    product.name = name.trim() || product.name;
-
-    product.description =
-      description.trim() || product.description;
-
-    product.price =
-      Number(price) || product.price;
-
-    product.icon =
-      icon.trim() || product.icon;
-
-
-    saveProducts();
-
-    loadProducts();
-
-    alert("✅ Product updated!");
-
-  }
-
-
-  function deleteProduct(id) {
-
-    const product =
-      products.find(p => p.id === id);
-
-    if (!product) return;
-
-
-    const confirmDelete =
-      confirm(
-        "Delete " + product.name + "?"
-      );
-
-
-    if (!confirmDelete) return;
-
-
-    products =
-      products.filter(p => p.id !== id);
-
-    saveProducts();
-
-    loadProducts();
-
-    alert("🗑️ Product deleted!");
-
-  }
-
-
-  /* ================= ORDERS ================= */
-
-  let orders =
-    JSON.parse(localStorage.getItem("ffOrders")) || [];
-
-
-  function loadOrders() {
-
-    const list =
-      document.getElementById("orderList");
-
-    list.innerHTML = "";
-
-
-    if (orders.length === 0) {
-
-      list.innerHTML =
-        '<div class="empty">No orders yet.</div>';
-
-      updateStats();
-
-      return;
-
-    }
-
-
-    orders.forEach(order => {
-
-      list.innerHTML += `
-
-        <div class="order">
-
-          <strong>
-            Order #${escapeHTML(String(order.id))}
-          </strong>
-
-          <p>
-            Product:
-            ${escapeHTML(order.product)}
-          </p>
-
-          <p>
-            Price:
-            ₹${Number(order.price).toLocaleString("en-IN")}
-          </p>
-
-          <p>
-            Date:
-            ${escapeHTML(order.date || "")}
-          </p>
-
-          <span class="order-status">
-            ${escapeHTML(order.status || "Pending")}
-          </span>
-
-        </div>
-
-      `;
-
-    });
-
-
-    updateStats();
-
-  }
-
-
-  /* ================= STATS ================= */
-
-  function updateStats() {
-
-    document.getElementById("productCount").textContent =
-      products.length;
-
-    document.getElementById("orderCount").textContent =
-      orders.length;
-
-
-    const total =
-      orders.reduce(
-        (sum, order) =>
-          sum + Number(order.price || 0),
-        0
-      );
-
-
-    document.getElementById("salesCount").textContent =
-      "₹" + total.toLocaleString("en-IN");
-
-  }
-
-
-  /* ================= SECURITY HELPER ================= */
-
-  function escapeHTML(value) {
-
-    return String(value)
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-
-  }
-
-
-  /* ================= AUTO LOGIN ================= */
-
-  if (
-    localStorage.getItem("adminLoggedIn") === "true"
-  ) {
-
-    showAdmin();
-
-  }
-
+});
 </script>
-
 </body>
 </html>
