@@ -19,7 +19,7 @@ button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:poin
 .modal.show{display:flex}.box{width:min(480px,100%);background:#151c32;border:1px solid #303d62;border-radius:18px;padding:20px}
 .box h2{margin-top:0}input,textarea{width:100%;padding:13px;margin:7px 0 12px;border-radius:10px;border:1px solid #39466b;background:#0d1427;color:#fff;font-size:16px}
 textarea{min-height:90px;resize:vertical}.row{display:flex;gap:10px}.row button{flex:1}.cancel{background:#303a59;color:#fff}.submit{background:#00d084;color:#07130d}
-.message{text-align:center;margin-top:12px;min-height:20px}
+.payment{text-align:center;margin:12px 0 16px;padding:14px;background:#0d1427;border:1px solid #39466b;border-radius:14px}.payment h3{margin:0 0 8px}.qr{width:230px;height:230px;margin:10px auto;background:#fff;border-radius:10px;padding:8px}.paybtn{display:inline-block;background:#6c63ff;color:#fff;text-decoration:none;border-radius:10px;padding:11px 15px;font-weight:700;margin-top:8px}.paynote{color:#aeb8d6;font-size:13px;margin:7px 0 0}.message{text-align:center;margin-top:12px;min-height:20px}
 .empty{text-align:center;color:#aeb8d6;padding:40px}
 footer{text-align:center;color:#7783a5;padding:30px}
 </style>
@@ -36,6 +36,12 @@ footer{text-align:center;color:#7783a5;padding:30px}
   <div class="box">
     <h2 id="modalTitle">Place Order</h2>
     <p id="modalPrice"></p>
+    <div class="payment">
+      <h3>💳 Pay via UPI</h3>
+      <div id="qr" class="qr"></div>
+      <a id="payBtn" class="paybtn" href="#">📱 Open UPI App</a>
+      <div class="paynote">Scan the QR or tap the button to pay the exact order amount.</div>
+    </div>
     <form id="orderForm">
       <input id="customerName" placeholder="Your name" required maxlength="80">
       <input id="contact" placeholder="WhatsApp / Phone / Contact" required maxlength="80">
@@ -49,6 +55,7 @@ footer{text-align:center;color:#7783a5;padding:30px}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
@@ -72,6 +79,18 @@ const statusEl = document.getElementById("status");
 const modal = document.getElementById("modal");
 const form = document.getElementById("orderForm");
 let selectedProduct = null;
+const UPI_ID = "7543853230@yesfam";
+const UPI_NAME = "PARDUM BHAI";
+
+function showPaymentQR(amount){
+  const qrEl = document.getElementById("qr");
+  qrEl.innerHTML = "";
+  const value = Number(amount || 0).toFixed(2);
+  const upiUrl = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${encodeURIComponent(value)}&cu=INR`;
+  new QRCode(qrEl, {text: upiUrl, width:214, height:214, correctLevel: QRCode.CorrectLevel.M});
+  const payBtn = document.getElementById("payBtn");
+  payBtn.href = upiUrl;
+}
 
 function safeText(v){ return v == null ? "" : String(v); }
 function productName(d){
@@ -112,6 +131,7 @@ function openOrder(p){
   selectedProduct = p;
   document.getElementById("modalTitle").textContent = "Order: " + productName(p);
   document.getElementById("modalPrice").textContent = "Price: ₹" + Number(p.price ?? 0).toFixed(2);
+  showPaymentQR(Number(p.price ?? 0));
   document.getElementById("message").textContent = "";
   form.reset();
   modal.classList.add("show");
